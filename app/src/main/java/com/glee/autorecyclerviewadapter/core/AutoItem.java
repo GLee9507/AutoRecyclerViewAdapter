@@ -9,4 +9,6 @@ public interface AutoItem {
 
     @IdRes
     int getBrId();
+
+
 }

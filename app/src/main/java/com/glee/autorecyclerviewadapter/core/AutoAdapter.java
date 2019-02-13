@@ -1,5 +1,6 @@
 package com.glee.autorecyclerviewadapter.core;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -11,8 +12,12 @@ import androidx.databinding.ObservableList;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
-    private AutoBinder binder;
-    private LayoutInflater inflater;
+    AutoBinder binder;
+    LayoutInflater inflater;
+
+    public AutoAdapter(AutoBinder binder) {
+        setBinder(binder);
+    }
 
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -25,22 +30,38 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
         super.onDetachedFromRecyclerView(recyclerView);
         inflater = null;
         binder.getData().removeOnListChangedCallback(callback);
+        binder.getFooters().removeOnListChangedCallback(footerCallback);
+        binder.getHeaders().removeOnListChangedCallback(headerCallback);
     }
 
     public void setBinder(AutoBinder autoBinder) {
         this.binder = autoBinder;
         binder.getData().addOnListChangedCallback(callback);
+        binder.getHeaders().addOnListChangedCallback(headerCallback);
+        binder.getFooters().addOnListChangedCallback(footerCallback);
     }
 
     @NonNull
     @Override
     public AutoHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new AutoHolder(DataBindingUtil.inflate(inflater, viewType, parent, false), findBrIdByLayoutId(viewType));
+        AutoItem autoItem = findAutoItemByLayoutId(viewType);
+        boolean isItem = autoItem == binder;
+        return new AutoHolder(this,
+                DataBindingUtil.inflate(inflater, viewType, parent, false),
+                autoItem.getBrId(),
+                isItem
+        );
     }
 
     @Override
     public void onBindViewHolder(@NonNull AutoHolder holder, int position) {
-        holder.bind(binder.getData().get(position));
+        if (binder.getHeaderCount() > position) {
+            holder.bind(((Header) binder.getHeaders().get(position)).getData());
+        } else if ((binder.getHeaderCount() + binder.getItemCount() > position)) {
+            holder.bind(binder.getData().get(position - binder.getHeaderCount()));
+        } else {
+            holder.bind(((Footer) binder.getFooters().get(position - binder.getHeaderCount() - binder.getItemCount())).getData());
+        }
     }
 
     @Override
@@ -50,12 +71,12 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return getAutoItem(position).getLayoutId();
+        return findAutoItemByPosition(position).getLayoutId();
     }
 
-    private int findBrIdByLayoutId(int layoutId) {
+    private AutoItem findAutoItemByLayoutId(int layoutId) {
         if (binder.getLayoutId() == layoutId) {
-            return binder.getBrId();
+            return binder;
         }
 
         List headers = binder.getHeaders();
@@ -63,7 +84,7 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
             for (int i = 0; i < headers.size(); i++) {
                 Header header = (Header) headers.get(i);
                 if (header.getLayoutId() == layoutId) {
-                    return header.getBrId();
+                    return header;
                 }
             }
         }
@@ -72,14 +93,14 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
             for (int i = 0; i < footers.size(); i++) {
                 Footer footer = (Footer) footers.get(i);
                 if (footer.getLayoutId() == layoutId) {
-                    return footer.getBrId();
+                    return footer;
                 }
             }
         }
-        return binder.getBrId();
+        return binder;
     }
 
-    private AutoItem getAutoItem(int position) {
+    private AutoItem findAutoItemByPosition(int position) {
         if (binder.getHeaderCount() > position) {
             return ((Header) binder.getHeaders().get(position));
         } else if (binder.getHeaderCount() + binder.getItemCount() > position) {
@@ -92,7 +113,34 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
     private ObservableList.OnListChangedCallback callback = new ObservableList.OnListChangedCallback() {
         @Override
         public void onChanged(ObservableList sender) {
-            notifyDataSetChanged();
+            notifyItemRangeChanged(binder.getHeaderCount(), binder.getItemCount());
+        }
+
+        @Override
+        public void onItemRangeChanged(ObservableList sender, int positionStart, int itemCount) {
+            notifyItemRangeChanged(positionStart + binder.getHeaderCount(), itemCount);
+        }
+
+        @Override
+        public void onItemRangeInserted(ObservableList sender, int positionStart, int itemCount) {
+            notifyItemRangeInserted(positionStart + binder.getHeaderCount(), itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(ObservableList sender, int fromPosition, int toPosition, int itemCount) {
+            for (int i = 0; i < itemCount; i++) {
+                notifyItemMoved(fromPosition + i + binder.getHeaderCount(), toPosition + i);
+            }
+        }
+
+        @Override
+        public void onItemRangeRemoved(ObservableList sender, int positionStart, int itemCount) {
+            notifyItemRangeRemoved(positionStart + binder.getHeaderCount(), itemCount);
+        }
+    }, headerCallback = new ObservableList.OnListChangedCallback() {
+        @Override
+        public void onChanged(ObservableList sender) {
+            notifyItemRangeChanged(0, binder.getHeaderCount());
         }
 
         @Override
@@ -102,13 +150,13 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
 
         @Override
         public void onItemRangeInserted(ObservableList sender, int positionStart, int itemCount) {
-            notifyItemRangeInserted(positionStart, itemCount);
+            notifyItemRangeInserted(0, itemCount);
         }
 
         @Override
         public void onItemRangeMoved(ObservableList sender, int fromPosition, int toPosition, int itemCount) {
             for (int i = 0; i < itemCount; i++) {
-                notifyItemMoved(fromPosition + i, toPosition + i);
+                notifyItemMoved(fromPosition, toPosition + i);
             }
         }
 
@@ -116,5 +164,33 @@ public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
         public void onItemRangeRemoved(ObservableList sender, int positionStart, int itemCount) {
             notifyItemRangeRemoved(positionStart, itemCount);
         }
+    }, footerCallback = new ObservableList.OnListChangedCallback() {
+        @Override
+        public void onChanged(ObservableList sender) {
+            notifyItemRangeChanged(binder.getHeaderCount() + binder.getItemCount(), binder.getFooterCount());
+        }
+
+        @Override
+        public void onItemRangeChanged(ObservableList sender, int positionStart, int itemCount) {
+            notifyItemRangeChanged(binder.getHeaderCount() + binder.getItemCount(), itemCount);
+        }
+
+        @Override
+        public void onItemRangeInserted(ObservableList sender, int positionStart, int itemCount) {
+            notifyItemRangeInserted(binder.getHeaderCount() + binder.getItemCount(), itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(ObservableList sender, int fromPosition, int toPosition, int itemCount) {
+            for (int i = 0; i < itemCount; i++) {
+                notifyItemMoved(binder.getHeaderCount() + binder.getItemCount(), toPosition + i);
+            }
+        }
+
+        @Override
+        public void onItemRangeRemoved(ObservableList sender, int positionStart, int itemCount) {
+            notifyItemRangeRemoved(binder.getHeaderCount() + binder.getItemCount(), itemCount);
+        }
     };
+
 }

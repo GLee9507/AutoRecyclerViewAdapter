@@ -1,9 +1,9 @@
 package com.glee.autorecyclerviewadapter.core;
 
 public class Hf implements AutoItem{
-    private String key;
-    private int layoutId;
-    private int brId;
+    private final String key;
+    private final int layoutId;
+    private final int brId;
     private Object data;
 
     public Hf(String key, int layoutId, int brId, Object data) {
@@ -23,28 +23,21 @@ public class Hf implements AutoItem{
         return key;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
 
+    @Override
     public int getLayoutId() {
         return layoutId;
     }
 
-    public void setLayoutId(int layoutId) {
-        this.layoutId = layoutId;
-    }
 
+    @Override
     public int getBrId() {
         return brId;
     }
 
-    public void setBrId(int brId) {
-        this.brId = brId;
-    }
 
-    public Object getData() {
-        return data;
+    public <T>T getData() {
+        return (T) data;
     }
 
     public void setData(Object data) {

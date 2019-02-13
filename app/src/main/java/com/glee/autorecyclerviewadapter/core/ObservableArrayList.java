@@ -103,9 +103,9 @@ public class ObservableArrayList<T> extends ArrayList<T> implements ObservableLi
         mListeners.notifyChanged(this);
     }
 
-    public void update(int index, Func<T> func) {
-        func.apply(get(index));
-        mListeners.notifyChanged(this, index, 1);
+    public void update(int index, Function<T, T> func) {
+        set(index, func.apply(get(index)));
+//        mListeners.notifyChanged(this, index, 1);
     }
 
     @Override
@@ -126,7 +126,4 @@ public class ObservableArrayList<T> extends ArrayList<T> implements ObservableLi
         }
     }
 
-    interface Func<T> {
-        void apply(T t);
-    }
 }
