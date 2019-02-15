@@ -1,7 +1,8 @@
 package com.glee.autorecyclerviewadapter.core;
 
-import androidx.annotation.IdRes;
-import androidx.annotation.LayoutRes;
+
+import android.support.annotation.IdRes;
+import android.support.annotation.LayoutRes;
 
 public interface AutoItem {
     @LayoutRes

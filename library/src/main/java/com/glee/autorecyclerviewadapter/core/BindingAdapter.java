@@ -1,7 +1,8 @@
 package com.glee.autorecyclerviewadapter.core;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 /**
  * @author liji
@@ -11,9 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 public class BindingAdapter {
-    @androidx.databinding.BindingAdapter("app:bind")
+    @android.databinding.BindingAdapter("app:bind")
     public static void bind(RecyclerView recyclerView, AutoBinder binder) {
-        if (recyclerView.getAdapter()==null) {
+        if (recyclerView.getAdapter() == null) {
             recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext().getApplicationContext()));
             recyclerView.setAdapter(new AutoAdapter(binder));
         }

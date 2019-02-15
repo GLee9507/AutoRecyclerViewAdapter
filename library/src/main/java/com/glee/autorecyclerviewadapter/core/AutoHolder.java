@@ -1,17 +1,13 @@
 package com.glee.autorecyclerviewadapter.core;
 
-import android.view.View;
-import android.widget.AdapterView;
 
-import androidx.annotation.NonNull;
-import androidx.databinding.ViewDataBinding;
-import androidx.recyclerview.widget.RecyclerView;
+import android.databinding.ViewDataBinding;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 
 public class AutoHolder extends RecyclerView.ViewHolder {
     private final ViewDataBinding binding;
     private final int brId;
-    private final AutoAdapter adapter;
-    private int position = -1;
 
     public AutoHolder(AutoAdapter adapter,
                       @NonNull ViewDataBinding binding,
@@ -19,7 +15,6 @@ public class AutoHolder extends RecyclerView.ViewHolder {
         super(binding.getRoot());
         this.binding = binding;
         this.brId = brId;
-        this.adapter = adapter;
         if (isItem) {
             OnItemClickListener onItemClickListener = adapter.binder.getOnItemClickListener();
             OnItemLongClickListener onItemLongClickListener = adapter.binder.getOnItemLongClickListener();
@@ -34,7 +29,6 @@ public class AutoHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(Object o) {
-        position = getLayoutPosition();
         binding.setVariable(brId, o);
         binding.executePendingBindings();
     }

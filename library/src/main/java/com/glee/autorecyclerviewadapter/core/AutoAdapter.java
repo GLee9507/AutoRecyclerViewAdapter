@@ -1,15 +1,15 @@
 package com.glee.autorecyclerviewadapter.core;
 
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableList;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ObservableList;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class AutoAdapter extends RecyclerView.Adapter<AutoHolder> {
     AutoBinder binder;

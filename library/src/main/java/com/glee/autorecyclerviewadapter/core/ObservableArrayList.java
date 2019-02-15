@@ -1,12 +1,11 @@
 package com.glee.autorecyclerviewadapter.core;
 
+import android.databinding.ListChangeRegistry;
+import android.databinding.ObservableList;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
-import androidx.arch.core.util.Function;
-import androidx.databinding.ListChangeRegistry;
-import androidx.databinding.ObservableList;
+import java.util.function.Function;
 
 /**
  * An {@link ObservableList} implementation using ArrayList as an implementation.
@@ -126,4 +125,7 @@ public class ObservableArrayList<T> extends ArrayList<T> implements ObservableLi
         }
     }
 
+    public interface Function<I, O> {
+        O apply(I var1);
+    }
 }
